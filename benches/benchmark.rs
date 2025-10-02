@@ -356,7 +356,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     let pattern = &benchmark.pattern;
 
                     for input in benchmark.inputs.match_.iter().chain(&benchmark.inputs.no_match) {
-                        criterion::black_box(engine_regex_bytes::matches(
+                        std::hint::black_box(engine_regex_bytes::matches(
                             pattern,
                             input.as_bytes(),
                         ));
@@ -376,7 +376,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     for input in
                         benchmark.inputs.match_.iter().chain(benchmark.inputs.no_match.iter())
                     {
-                        criterion::black_box(engine_regex_bytes::matches_compiled(
+                        std::hint::black_box(engine_regex_bytes::matches_compiled(
                             regex_compiled,
                             input.as_bytes(),
                         ));
@@ -391,7 +391,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     let pattern = &benchmark.pattern;
 
                     for input in benchmark.inputs.match_.iter().chain(&benchmark.inputs.no_match) {
-                        criterion::black_box(engine_wildmatch::matches(pattern, input));
+                        std::hint::black_box(engine_wildmatch::matches(pattern, input));
                     }
                 }
             });
@@ -408,7 +408,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     for input in
                         benchmark.inputs.match_.iter().chain(benchmark.inputs.no_match.iter())
                     {
-                        criterion::black_box(engine_wildmatch::matches_compiled(
+                        std::hint::black_box(engine_wildmatch::matches_compiled(
                             wildmatch_compiled,
                             input,
                         ));
@@ -423,7 +423,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     let pattern = &benchmark.pattern;
 
                     for input in benchmark.inputs.match_.iter().chain(&benchmark.inputs.no_match) {
-                        criterion::black_box(engine_wildcard::matches(
+                        std::hint::black_box(engine_wildcard::matches(
                             pattern.as_bytes(),
                             input.as_bytes(),
                         ));
@@ -446,7 +446,7 @@ fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {
                     for input in
                         benchmark.inputs.match_.iter().chain(benchmark.inputs.no_match.iter())
                     {
-                        criterion::black_box(engine_wildcard::matches_compiled(
+                        std::hint::black_box(engine_wildcard::matches_compiled(
                             wildcard_compiled,
                             input.as_bytes(),
                         ));
@@ -488,7 +488,7 @@ fn benchmark_benchdata_comparison_captures(c: &mut Criterion) {
                     let pattern = &benchmark.pattern;
 
                     for input in benchmark.inputs.match_.iter().chain(&benchmark.inputs.no_match) {
-                        criterion::black_box(engine_regex_bytes::captures(
+                        std::hint::black_box(engine_regex_bytes::captures(
                             pattern,
                             input.as_bytes(),
                         ));
@@ -508,7 +508,7 @@ fn benchmark_benchdata_comparison_captures(c: &mut Criterion) {
                     for input in
                         benchmark.inputs.match_.iter().chain(benchmark.inputs.no_match.iter())
                     {
-                        criterion::black_box(engine_regex_bytes::captures_compiled(
+                        std::hint::black_box(engine_regex_bytes::captures_compiled(
                             regex_compiled,
                             input.as_bytes(),
                         ));
@@ -523,7 +523,7 @@ fn benchmark_benchdata_comparison_captures(c: &mut Criterion) {
                     let pattern = &benchmark.pattern;
 
                     for input in benchmark.inputs.match_.iter().chain(&benchmark.inputs.no_match) {
-                        criterion::black_box(engine_wildcard::captures(
+                        std::hint::black_box(engine_wildcard::captures(
                             pattern.as_bytes(),
                             input.as_bytes(),
                         ));
@@ -546,7 +546,7 @@ fn benchmark_benchdata_comparison_captures(c: &mut Criterion) {
                     for input in
                         benchmark.inputs.match_.iter().chain(benchmark.inputs.no_match.iter())
                     {
-                        criterion::black_box(engine_wildcard::captures_compiled(
+                        std::hint::black_box(engine_wildcard::captures_compiled(
                             wildcard_compiled,
                             input.as_bytes(),
                         ));
