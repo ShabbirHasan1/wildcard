@@ -1179,49 +1179,49 @@ mod tests {
     impl NormalCharGen {
         const ALPHA_CHARS: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        fn new(gen: &mut Gen) -> NormalCharGen {
+        fn new(generator: &mut Gen) -> NormalCharGen {
             // Bias towards a small set of characters.
-            let chars_range = 1 + match u8::arbitrary(gen) % 100 {
-                0..=10 => usize::arbitrary(gen) % (1 + usize::arbitrary(gen) % 2),
-                11..=20 => usize::arbitrary(gen) % (1 + usize::arbitrary(gen) % 4),
-                21..=30 => usize::arbitrary(gen) % (1 + usize::arbitrary(gen) % 6),
-                31..=40 => usize::arbitrary(gen) % (1 + usize::arbitrary(gen) % 8),
-                41..=50 => usize::arbitrary(gen) % (1 + usize::arbitrary(gen) % 10),
-                _ => usize::arbitrary(gen) % NormalCharGen::ALPHA_CHARS.len(),
+            let chars_range = 1 + match u8::arbitrary(generator) % 100 {
+                0..=10 => usize::arbitrary(generator) % (1 + usize::arbitrary(generator) % 2),
+                11..=20 => usize::arbitrary(generator) % (1 + usize::arbitrary(generator) % 4),
+                21..=30 => usize::arbitrary(generator) % (1 + usize::arbitrary(generator) % 6),
+                31..=40 => usize::arbitrary(generator) % (1 + usize::arbitrary(generator) % 8),
+                41..=50 => usize::arbitrary(generator) % (1 + usize::arbitrary(generator) % 10),
+                _ => usize::arbitrary(generator) % NormalCharGen::ALPHA_CHARS.len(),
             };
 
             NormalCharGen { chars_range }
         }
 
-        fn gen(&self, gen: &mut Gen) -> &'static str {
-            let index = usize::arbitrary(gen) % self.chars_range;
+        fn generator(&self, generator: &mut Gen) -> &'static str {
+            let index = usize::arbitrary(generator) % self.chars_range;
             &NormalCharGen::ALPHA_CHARS[index..=index]
         }
 
-        fn gen_maybe_special(&self, gen: &mut Gen) -> &'static str {
-            match u8::arbitrary(gen) % 100 {
+        fn gen_maybe_special(&self, generator: &mut Gen) -> &'static str {
+            match u8::arbitrary(generator) % 100 {
                 0..=1 => "*",
                 2..=3 => "?",
                 4..=5 => r"\",
-                _ => self.gen(gen),
+                _ => self.generator(generator),
             }
         }
 
-        fn widen(&self, gen: &mut Gen) -> NormalCharGen {
+        fn widen(&self, generator: &mut Gen) -> NormalCharGen {
             NormalCharGen {
                 chars_range: 1
-                    + (self.chars_range + (usize::arbitrary(gen) % 5))
+                    + (self.chars_range + (usize::arbitrary(generator) % 5))
                         % NormalCharGen::ALPHA_CHARS.len(),
             }
         }
     }
 
-    fn arbitrary_length(gen: &mut Gen) -> usize {
-        match u8::arbitrary(gen) % 100 {
+    fn arbitrary_length(generator: &mut Gen) -> usize {
+        match u8::arbitrary(generator) % 100 {
             0..=15 => 0,
-            16..=30 => 1 + usize::arbitrary(gen) % 5,
-            31..=50 => 1 + usize::arbitrary(gen) % 10,
-            _ => 1 + usize::arbitrary(gen) % gen.size(),
+            16..=30 => 1 + usize::arbitrary(generator) % 5,
+            31..=50 => 1 + usize::arbitrary(generator) % 10,
+            _ => 1 + usize::arbitrary(generator) % generator.size(),
         }
     }
 
@@ -1245,23 +1245,25 @@ mod tests {
     }
 
     fn create_input_matching_pattern(
-        gen: &mut Gen,
+        generator: &mut Gen,
         normal_chars_gen: &NormalCharGen,
         pattern: &[WildcardToken],
     ) -> String {
         // Let's have a wider charset than the pattern.
-        let normal_chars_gen = normal_chars_gen.widen(gen);
+        let normal_chars_gen = normal_chars_gen.widen(generator);
         let mut input = String::with_capacity(pattern.len());
 
         for token in pattern {
             match token {
                 WildcardToken::MetasymbolAny => {
-                    let len = arbitrary_length(gen);
+                    let len = arbitrary_length(generator);
 
-                    (0..len).for_each(|_| input.push_str(normal_chars_gen.gen_maybe_special(gen)));
+                    (0..len).for_each(|_| {
+                        input.push_str(normal_chars_gen.gen_maybe_special(generator));
+                    });
                 }
                 WildcardToken::MetasymbolOne => {
-                    input.push_str(normal_chars_gen.gen_maybe_special(gen));
+                    input.push_str(normal_chars_gen.gen_maybe_special(generator));
                 }
                 WildcardToken::Symbol(b) => {
                     input.push(char::from(*b));
@@ -1272,57 +1274,60 @@ mod tests {
         input
     }
 
-    fn arbitrary_wildcard_token(gen: &mut Gen, normal_chars_gen: &NormalCharGen) -> WildcardToken {
-        match u8::arbitrary(gen) % 100 {
+    fn arbitrary_wildcard_token(
+        generator: &mut Gen,
+        normal_chars_gen: &NormalCharGen,
+    ) -> WildcardToken {
+        match u8::arbitrary(generator) % 100 {
             0..=20 => WildcardToken::MetasymbolAny,
             21..=30 => WildcardToken::MetasymbolOne,
             _ => {
                 // We want to have a reasonable chance of hitting something that requires
                 // escaping.
-                match u8::arbitrary(gen) % 100 {
+                match u8::arbitrary(generator) % 100 {
                     0..=5 => WildcardToken::Symbol(b'*'),
                     6..=10 => WildcardToken::Symbol(b'?'),
                     11..=15 => WildcardToken::Symbol(b'\\'),
-                    _ => WildcardToken::Symbol(normal_chars_gen.gen(gen).as_bytes()[0]),
+                    _ => WildcardToken::Symbol(normal_chars_gen.generator(generator).as_bytes()[0]),
                 }
             }
         }
     }
 
     fn arbitrary_wildcard_tokens(
-        gen: &mut Gen,
+        generator: &mut Gen,
         normal_chars_gen: &NormalCharGen,
     ) -> Vec<WildcardToken> {
-        let len = arbitrary_length(gen);
+        let len = arbitrary_length(generator);
 
-        (0..len).map(|_| arbitrary_wildcard_token(gen, normal_chars_gen)).collect()
+        (0..len).map(|_| arbitrary_wildcard_token(generator, normal_chars_gen)).collect()
     }
 
-    fn arbitrary_input(gen: &mut Gen, normal_chars_gen: &NormalCharGen) -> String {
+    fn arbitrary_input(generator: &mut Gen, normal_chars_gen: &NormalCharGen) -> String {
         // Let's have a wider charset than the pattern.
-        let normal_chars_gen = normal_chars_gen.widen(gen);
-        let len = arbitrary_length(gen);
+        let normal_chars_gen = normal_chars_gen.widen(generator);
+        let len = arbitrary_length(generator);
 
-        (0..len).map(|_| normal_chars_gen.gen_maybe_special(gen)).collect()
+        (0..len).map(|_| normal_chars_gen.gen_maybe_special(generator)).collect()
     }
 
     impl Arbitrary for WildcardAndInput {
-        fn arbitrary(gen: &mut Gen) -> WildcardAndInput {
-            let will_match = bool::arbitrary(gen);
+        fn arbitrary(generator: &mut Gen) -> WildcardAndInput {
+            let will_match = bool::arbitrary(generator);
 
             match will_match {
                 true => {
                     let WildcardAndMatchingInput { pattern, input } =
-                        WildcardAndMatchingInput::arbitrary(gen);
+                        WildcardAndMatchingInput::arbitrary(generator);
 
                     WildcardAndInput { pattern, input }
                 }
                 false => {
-                    let normal_chars_gen = NormalCharGen::new(gen);
-                    let pattern_tokens = arbitrary_wildcard_tokens(gen, &normal_chars_gen);
+                    let normal_chars_gen = NormalCharGen::new(generator);
+                    let pattern_tokens = arbitrary_wildcard_tokens(generator, &normal_chars_gen);
                     let pattern = wildcard_tokens_to_pattern(&pattern_tokens);
 
-                    let input = arbitrary_input(gen, &normal_chars_gen);
+                    let input = arbitrary_input(generator, &normal_chars_gen);
 
                     WildcardAndInput { pattern, input }
                 }
@@ -1338,18 +1343,19 @@ mod tests {
     }
 
     impl Arbitrary for WildcardAndMatchingInput {
-        fn arbitrary(gen: &mut Gen) -> WildcardAndMatchingInput {
-            let normal_chars_gen = NormalCharGen::new(gen);
-            let pattern_tokens = arbitrary_wildcard_tokens(gen, &normal_chars_gen);
+        fn arbitrary(generator: &mut Gen) -> WildcardAndMatchingInput {
+            let normal_chars_gen = NormalCharGen::new(generator);
+            let pattern_tokens = arbitrary_wildcard_tokens(generator, &normal_chars_gen);
             let pattern = wildcard_tokens_to_pattern(&pattern_tokens);
 
             let input = {
-                let input = create_input_matching_pattern(gen, &normal_chars_gen, &pattern_tokens);
+                let input =
+                    create_input_matching_pattern(generator, &normal_chars_gen, &pattern_tokens);
 
                 assert!(
-                        engine_regex_bytes::matches(&pattern, input.as_bytes(), false),
-                        "failed to create an input that matched the pattern\npattern: {pattern}\ninput  : {input}",
-                    );
+                    engine_regex_bytes::matches(&pattern, input.as_bytes(), false),
+                    "failed to create an input that matched the pattern\npattern: {pattern}\ninput  : {input}",
+                );
 
                 input
             };

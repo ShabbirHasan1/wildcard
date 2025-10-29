@@ -17,7 +17,7 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::too_many_lines)]
 
-use criterion::{criterion_group, criterion_main, Criterion, Throughput};
+use criterion::{Criterion, Throughput, criterion_group, criterion_main};
 use std::time::Duration;
 
 mod engine_wildmatch {
@@ -324,7 +324,7 @@ fn read_benchmark(size_kib: usize) -> Benchmarks {
 }
 
 fn is_short_bench() -> bool {
-    std::env::var("SHORT_BENCH").ok().map_or(false, |v| v == "1")
+    std::env::var("SHORT_BENCH").ok().is_some_and(|v| v == "1")
 }
 
 fn benchmark_benchdata_comparison_matches(c: &mut Criterion) {

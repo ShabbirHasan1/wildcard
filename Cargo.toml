@@ -4,8 +4,8 @@ description = "Wildcard matching"
 version = "0.3.1-pre"
 authors = ["Diogo Sousa <dsousa@cloudflare.com>"]
 
-edition = "2021"
-rust-version = "1.66.1"
+edition = "2024"
+rust-version = "1.85.0"
 
 homepage = "https://github.com/cloudflare/wildcard"
 repository = "https://github.com/cloudflare/wildcard"
