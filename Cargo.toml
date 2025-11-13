@@ -41,9 +41,6 @@ serde = "1.0.228"
 toml = "0.9.8"
 wildmatch = "2.5.0"
 
-[features]
-fatal-warnings = []
-
 [lib]
 # Disable libtest benchmarks so we can use criterion flags (see https://bheisler.github.io/criterion.rs/book/faq.html
 # and https://github.com/rust-lang/rust/issues/47241).

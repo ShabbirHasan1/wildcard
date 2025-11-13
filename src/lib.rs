@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #![no_std]
-#![cfg_attr(feature = "fatal-warnings", deny(warnings))]
 // Note: If you change this remember to update `README.md`. To do so run `cargo rdme`.
 //! `wildcard` is a rust crate for wildcard matching.
 //!
